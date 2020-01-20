@@ -1,13 +1,5 @@
 from itertools import product
-
-# 1's represent walls, 0's are 'walkable'
-field = [
-    [0, 1, 0, 0, 0],
-    [0, 1, 0, 0, 0],
-    [0, 1, 1, 1, 0],
-    [0, 0, 0, 1, 0],
-    [0, 1, 0, 0, 0]
-]
+from termcolor import colored
 
 
 class PathFinder():
@@ -22,6 +14,8 @@ class PathFinder():
         self.height = len(maze)
         self.width = len(maze[0])
 
+        self.path = []
+
     def solve(self):
         # 3.  while the open list is not empty
         while len(self.open_list) > 0:
@@ -30,7 +24,7 @@ class PathFinder():
             current_index = 0
             # b) pop q off the open list
             for index, node in enumerate(self.open_list):
-                if node == current_node:
+                if node.F < current_node.F:
                     current_node = node
                     current_index = index
 
@@ -39,12 +33,12 @@ class PathFinder():
 
             # Check if the maze has been solved
             if current_node == self.end:
-                path = []
                 current = current_node
                 while current:
-                    path.append(current)
+                    self.path.append(current.position)
                     current = current.parent
-                return path[::-1]
+                self.path = self.path[::-1]
+                return True
 
             childs = []
             # c) generate q's 8 successors and set their parents to q
@@ -57,7 +51,7 @@ class PathFinder():
                     continue
 
                 # If the cell is not walkable, return
-                if self.maze[new_pos[0]][new_pos[1]] != 0:
+                if self.maze[new_pos[0]][new_pos[1]] != 'O' and self.maze[new_pos[0]][new_pos[1]] != 'N':
                     continue
 
                 childs.append(Node(current_node, new_pos))
@@ -85,6 +79,27 @@ class PathFinder():
                 #      child.F, 'Open list lengt: ', len(self.open_list))
                 self.open_list.append(child)
 
+    def print_board(self):
+        if len(self.closed_list) > 0:
+            for item in self.path:
+                self.maze[item[0]][item[1]] = 'X'
+
+        self.maze[self.start.position[0]][self.start.position[1]] = 'N'
+        self.maze[self.end.position[0]][self.end.position[1]] = 'N'
+
+        for row in self.maze:
+            for index, col in enumerate(row):
+                if index == len(row)-1:
+                    if col == 'X' or col == 'N':
+                        print(colored(col, 'green'))
+                    else:
+                        print(col)
+                else:
+                    if col == 'X' or col=='N':
+                        print(colored(col, 'green'), end=" ")
+                    else:
+                        print(col, end=" ")
+
 
 class Node():
     def __init__(self, parent=None, position: tuple = None):
@@ -100,6 +115,18 @@ class Node():
 
 
 if __name__ == "__main__":
-    finder = PathFinder(field, (0, 0), (0, 4))
+    # l's represent walls, O's are 'walkable'
+    field = [
+        ['O', 'l', 'O', 'O', 'O'],
+        ['O', 'l', 'O', 'O', 'O'],
+        ['O', 'l', 'l', 'l', 'O'],
+        ['O', 'O', 'O', 'l', 'O'],
+        ['O', 'l', 'O', 'O', 'O']
+    ]
 
-    print(finder.solve())
+    finder = PathFinder(field, (0, 0), (0, 4))
+    print('Starting state')
+    finder.print_board()
+    finder.solve()
+    print('End state')
+    finder.print_board()
