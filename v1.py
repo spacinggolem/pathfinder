@@ -2,11 +2,11 @@ from itertools import product
 
 # '' are emptty cells, x represents the nodes
 field = [
+    ['', '', '1', '', ''],
+    ['', 'x', '1', '', ''],
     ['', '', '', '', ''],
-    ['', 'x', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', ''],
-    ['', '', '', '', 'x']
+    ['', '', '1', '', ''],
+    ['', '', '1', '', 'x']
 ]
 
 # This will contain all the coordinates of the path
@@ -59,7 +59,7 @@ def getMoveScore(c_cell, p_cell, desitination):
 
     F = G + H
 
-    score = Score(F, G)
+    score = Score(F, G, H)
 
     return score
 
@@ -72,9 +72,12 @@ def getBestMove(c_node, end_node):
 
         neighbours = list(find_neigbours(c_node))
 
-        best_score = Score(0, 0)
+        best_score = Score(0, 0, 0)
         for neighbour in neighbours:
             score = getMoveScore(c_node, neighbour, end_node)
+            if field[neighbour[0]][neighbour[1]] == '1':
+                continue
+
             # If this move is more efficient than last move or is the first one
             if score.F < best_score.F or best_score.F == 0:
                 best_move = neighbour
@@ -84,7 +87,7 @@ def getBestMove(c_node, end_node):
             best_move = [best_move[0]+1, best_move[1]]
 
         path.append(best_move)
-        print(f"Best move: {best_move} score: {best_score}")
+        print(f"Best move: {best_move} score: {best_score.H}")
         getBestMove(best_move, end_node)
 
 
@@ -93,9 +96,10 @@ def showResult():
 
 
 class Score():
-    def __init__(self, F, G):
+    def __init__(self, F, G, H):
         self.F = F
         self.G = G
+        self.H = H
 
 
 if __name__ == "__main__":
