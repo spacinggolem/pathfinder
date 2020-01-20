@@ -1,9 +1,8 @@
-from itertools import product
 from termcolor import colored
 
 
 class PathFinder():
-    def __init__(self, maze, start, end):
+    def __init__(self, maze, start, end, wall_char="l", node_char="N", walkable_char="O", path_char="X"):
         self.maze = maze
         self.start = Node(None, start)
         self.end = Node(None, end)
@@ -13,6 +12,11 @@ class PathFinder():
 
         self.height = len(maze)
         self.width = len(maze[0])
+
+        self.wall_char = wall_char
+        self.node_char = node_char
+        self.walkable_char = walkable_char
+        self.path_char = path_char
 
         self.path = []
 
@@ -30,6 +34,7 @@ class PathFinder():
 
             self.open_list.pop(current_index)
             self.closed_list.append(current_node)
+            current_node.print_node()
 
             # Check if the maze has been solved
             if current_node == self.end:
@@ -51,7 +56,11 @@ class PathFinder():
                     continue
 
                 # If the cell is not walkable, return
-                if self.maze[new_pos[0]][new_pos[1]] != 'O' and self.maze[new_pos[0]][new_pos[1]] != 'N':
+                if self.maze[new_pos[0]][new_pos[1]] != self.walkable_char and self.maze[new_pos[0]][new_pos[1]] != self.node_char:
+                    continue
+                
+                # Check if the neighbour already is in the closed list
+                if Node(current_node, new_pos) in self.closed_list:
                     continue
 
                 childs.append(Node(current_node, new_pos))
@@ -75,31 +84,32 @@ class PathFinder():
                     if child == x and child.G > x.G:
                         continue
                 self.open_list.append(child)
+        return False
 
     def print_board(self):
         if len(self.path) > 0:
             for item in self.path:
-                self.maze[item[0]][item[1]] = 'X'
+                self.maze[item[0]][item[1]] = self.path_char
 
-        self.maze[self.start.position[0]][self.start.position[1]] = 'N'
-        self.maze[self.end.position[0]][self.end.position[1]] = 'N'
+        self.maze[self.start.position[0]][self.start.position[1]] = self.node_char
+        self.maze[self.end.position[0]][self.end.position[1]] = self.node_char
 
         for row in self.maze:
             for index, col in enumerate(row):
                 if index == len(row)-1:
-                    if col == 'X' or col == 'N':
-                        print(colored(col, 'green'))
-                    elif col == 'l':
-                        print(colored(col, 'red'))
-                    else:
+                    # if col == self.path_char or col == self.node_char:
+                    #     print(colored(col, 'green'))
+                    # elif col == 'l':
+                    #     print(colored(col, 'red'))
+                    # else:
                         print(col)
                 else:
-                    if col == 'X' or col == 'N':
-                        print(colored(col, 'green'), end=" ")
-                    elif col == 'l':
-                        print(colored(col, 'red'), end=" ")
-                    else:
-                        print(col, end=" ")
+                    # if col == self.path_char or col == self.node_char:
+                    #     print(colored(col, 'green'), end=" ")
+                    # elif col == 'l':
+                    #     print(colored(col, 'red'), end=" ")
+                    # else:
+                        print(col, end="  ")
 
 
 class Node():
@@ -113,6 +123,9 @@ class Node():
 
     def __eq__(self, value):
         return self.position == value.position
+    
+    def print_node(self):
+        print('New point: ', self.position, 'G =',self.G,'H =', self.H, 'F = G + H', self.F,)
 
 
 if __name__ == "__main__":
@@ -125,9 +138,21 @@ if __name__ == "__main__":
         ['O', 'l', 'O', 'O', 'O']
     ]
 
-    finder = PathFinder(field, (0, 0), (0, 4))
+    start = (0, 0)
+    end = (0, 4)
+
+    wall_char = "l"
+    node_char = "N"
+    walkable_char = "O"
+    path_char = "X"
+
+
+
+    finder = PathFinder(field, start, end, wall_char, node_char, walkable_char, path_char)
     print('Starting state')
     finder.print_board()
-    finder.solve()
-    print('End state')
-    finder.print_board()
+    if finder.solve():
+        print('End state')
+        finder.print_board()
+    else:
+        print("The board couldn't be solved, please make sure the path is open")
