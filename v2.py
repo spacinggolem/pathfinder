@@ -17,7 +17,7 @@ class PathFinder():
         self.path = []
 
     def solve(self):
-        # 3.  while the open list is not empty
+        # While the open list is not empty
         while len(self.open_list) > 0:
 
             current_node = self.open_list[0]
@@ -41,7 +41,7 @@ class PathFinder():
                 return True
 
             childs = []
-            # c) generate q's 8 successors and set their parents to q
+            # generate q's 8 successors and set their parents to q
             for pos in [(0, -1), (0, 1), (-1, 0), (1, 0), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
                 new_pos = (current_node.position[0] + pos[0],
                            current_node.position[1] + pos[1])
@@ -74,13 +74,10 @@ class PathFinder():
                 for x in self.open_list:
                     if child == x and child.G > x.G:
                         continue
-
-               # print('Position found: ', child.position, 'score: ',
-                #      child.F, 'Open list lengt: ', len(self.open_list))
                 self.open_list.append(child)
 
     def print_board(self):
-        if len(self.closed_list) > 0:
+        if len(self.path) > 0:
             for item in self.path:
                 self.maze[item[0]][item[1]] = 'X'
 
@@ -92,11 +89,15 @@ class PathFinder():
                 if index == len(row)-1:
                     if col == 'X' or col == 'N':
                         print(colored(col, 'green'))
+                    elif col == 'l':
+                        print(colored(col, 'red'))
                     else:
                         print(col)
                 else:
-                    if col == 'X' or col=='N':
+                    if col == 'X' or col == 'N':
                         print(colored(col, 'green'), end=" ")
+                    elif col == 'l':
+                        print(colored(col, 'red'), end=" ")
                     else:
                         print(col, end=" ")
 
